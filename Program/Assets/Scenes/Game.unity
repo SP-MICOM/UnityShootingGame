@@ -613,6 +613,7 @@ GameObject:
   - component: {fileID: 4346660468640402916}
   - component: {fileID: 4346660468640402915}
   - component: {fileID: 4346660468640402914}
+  - component: {fileID: 4346660468640402917}
   m_Layer: 0
   m_Name: SpaceShip
   m_TagString: Untagged
@@ -652,6 +653,9 @@ MonoBehaviour:
   quaternion: {x: 0, y: 0, z: 0, w: 0}
   vector3: {x: 0, y: 0, z: 0}
   rigidbody: {fileID: 0}
+  isRolling: 0
+  rollingComboTime: 0
+  rollingCoolTime: 0
 --- !u!54 &4346660468640402915
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -700,6 +704,28 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 43.249725, y: 6.24388, z: 38.072304}
   m_Center: {x: 0, y: 3.12194, z: 2.0753088}
+--- !u!95 &4346660468640402917
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3970380494976784219}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 934ed638c3c5bf54b99312100460dda3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
