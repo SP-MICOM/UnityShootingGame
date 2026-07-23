@@ -656,6 +656,8 @@ MonoBehaviour:
   isRolling: 0
   rollingComboTime: 0
   rollingCoolTime: 0
+  rollingDirection: 0
+  rollingCount: 0
 --- !u!54 &4346660468640402915
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -716,7 +718,7 @@ Animator:
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 934ed638c3c5bf54b99312100460dda3, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 0
+  m_UpdateMode: 1
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0

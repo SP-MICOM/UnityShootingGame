@@ -14,9 +14,11 @@ public class Character : MonoBehaviour
     [SerializeField] bool isRolling = false;
     [SerializeField] float rollingComboTime = 0f;
     [SerializeField] float rollingCoolTime = 0f;
-    
-    private static float comboTime = 0.5f;
-    private static float coolTime = 0.5f;
+    [SerializeField] int rollingDirection; // 1 = Left, -1 = Right
+    [SerializeField] int rollingCount;
+
+    private static float comboTime = 0.3f;
+    private static float coolTime = 0.75f;
 
     private void Start()
     {
@@ -33,13 +35,21 @@ public class Character : MonoBehaviour
     private void FixedUpdate()
     {
         Move();
-        Rolling();
         Rotate();
+        Rolling();
     }
 
     public void Control()
     {
-        vector3.x = Input.GetAxis("Horizontal");
+        if (rollingDirection != 0)
+        {
+            vector3.x = Input.GetAxis("Horizontal") + (0.3f * -rollingDirection) * Mathf.Abs(Input.GetAxis("Horizontal"));
+        }
+        else
+        {
+            vector3.x = Input.GetAxis("Horizontal");
+        }
+
         vector3.y = Input.GetAxis("Vertical");
 
         quaternion = Quaternion.Euler(0, 0, Input.GetAxis("Horizontal") * -speed);
@@ -63,10 +73,23 @@ public class Character : MonoBehaviour
 
     public bool CheckCombo()
     {
-        if(Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Q))
+        if (isRolling) return false;
+
+        if(Input.GetKeyDown(KeyCode.E))
         {
             if(Time.time < rollingComboTime)
             {
+                rollingDirection = -1; 
+                rollingCoolTime = Time.time + coolTime;
+
+                return true;
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Q))
+        {
+            if (Time.time < rollingComboTime)
+            {
+                rollingDirection = 1;
                 rollingCoolTime = Time.time + coolTime;
 
                 return true;
@@ -78,29 +101,46 @@ public class Character : MonoBehaviour
 
     public void Move()
     {
-        rigidbody.transform.position += vector3 * speed * Time.deltaTime;
+        rigidbody.transform.position += vector3 * speed * Time.fixedDeltaTime;
     }
 
     public void Rotate()
     {
         if (!isRolling)
         {
-            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.deltaTime * speed);
+            Debug.Log("Rotating");
+
+            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.fixedDeltaTime * speed);
         }
     }
 
     public void Rolling()
     {
-        if (Time.time > rollingCoolTime)
+        if (Time.fixedTime > rollingCoolTime)
         {
+            rollingDirection = 0;
             isRolling = false;
         }
 
-        if(CheckCombo() && !isRolling)
+        if (CheckCombo() && !isRolling)
         {
             Debug.Log("Rolling");
 
+            rollingCount = 0;
             isRolling = true;
+        }
+
+        if (isRolling && Time.fixedTime < rollingCoolTime - (coolTime / 2))
+        {
+            quaternion = Quaternion.Euler(0, 0, rollingCount * rollingDirection * (360f / (speed * coolTime)));
+
+            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.fixedDeltaTime * speed);
+
+            rollingCount++;
+        }
+        else if(isRolling)
+        {
+            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.fixedDeltaTime * speed);
         }
     }
 
