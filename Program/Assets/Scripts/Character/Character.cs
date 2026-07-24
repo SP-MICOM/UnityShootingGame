@@ -101,7 +101,28 @@ public class Character : MonoBehaviour
 
     public void Move()
     {
-        rigidbody.transform.position += vector3 * speed * Time.fixedDeltaTime;
+        float width = (Screen.width / 1000f) * 6f;
+        float height = (Screen.height / 1000f) * 6f;
+
+        float positionX = rigidbody.transform.position.x + vector3.x;
+        float positionY = rigidbody.transform.position.y + vector3.y;
+
+        bool isMoveX = Mathf.Abs(positionX) < width;
+        bool isMoveY = Mathf.Abs(positionY) < height;
+
+        if (isMoveX && isMoveY)
+        {
+            rigidbody.transform.position += vector3 * speed * Time.fixedDeltaTime;
+        }
+        else
+        {
+            Vector3 move = vector3 * speed * Time.fixedDeltaTime;
+
+            if (!isMoveX)  move.x = 0;
+            if (!isMoveY) move.y = 0;
+
+            rigidbody.transform.position += move;
+        }
     }
 
     public void Rotate()
@@ -142,6 +163,11 @@ public class Character : MonoBehaviour
         {
             rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.fixedDeltaTime * speed);
         }
+    }
+
+    public void Shoot()
+    {
+        
     }
 
     public void Pause()
