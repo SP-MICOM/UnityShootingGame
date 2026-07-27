@@ -6,19 +6,28 @@ using UnityEngine.UIElements;
 
 public class Character : MonoBehaviour
 {
+    // 스테이터스
     [SerializeField] float speed;
     [SerializeField] int Health;
+
+    // 컴포넌트
     [SerializeField] Quaternion quaternion;
     [SerializeField] Vector3 vector3;
     [SerializeField] Rigidbody rigidbody;
-    [SerializeField] bool isRolling = false;
-    [SerializeField] float rollingComboTime = 0f;
-    [SerializeField] float rollingCoolTime = 0f;
-    [SerializeField] int rollingDirection; // 1 = Left, -1 = Right
-    [SerializeField] int rollingCount;
 
-    private static float comboTime = 0.3f;
-    private static float coolTime = 0.75f;
+    // 롤링
+    public bool isRolling = false;
+    private float rollingComboTime = 0f;
+    private float rollingCoolTime = 0f;
+    private int rollingDirection; // 1 = Left, -1 = Right
+    private int rollingCount;
+    private static float comboTime = 0.4f;
+    private static float coolTime = 0.5f;
+
+    // 레이저
+    [SerializeField] Transform laserPositionA;
+    [SerializeField] Transform laserPositionB;
+    [SerializeField] Vector3 cursorPosition;
 
     private void Start()
     {
@@ -37,6 +46,8 @@ public class Character : MonoBehaviour
         Move();
         Rotate();
         Rolling();
+        Shoot(laserPositionA);
+        Shoot(laserPositionB);
     }
 
     public void Control()
@@ -50,7 +61,7 @@ public class Character : MonoBehaviour
             vector3.x = Input.GetAxis("Horizontal");
         }
 
-        vector3.y = Input.GetAxis("Vertical");
+        vector3.y = -Input.GetAxis("Vertical");
 
         quaternion = Quaternion.Euler(0, 0, Input.GetAxis("Horizontal") * -speed);
 
@@ -69,6 +80,10 @@ public class Character : MonoBehaviour
         {
             rollingComboTime = Time.time + comboTime;
         }
+
+        cursorPosition.x = transform.position.x;
+        cursorPosition.y = transform.position.y;
+        cursorPosition.z = transform.position.z + 100;
     }
 
     public bool CheckCombo()
@@ -165,9 +180,15 @@ public class Character : MonoBehaviour
         }
     }
 
-    public void Shoot()
+    public void Shoot(Transform transform)
     {
-        
+        if(Input.GetKey(KeyCode.Return))
+        {
+            GameObject laser = Resources.Load<GameObject>("Laser");
+
+            laser.transform.position = transform.position;
+            laser.transform.position = Vector3.Lerp(transform.position, cursorPosition, Time.fixedDeltaTime);
+        }
     }
 
     public void Pause()
