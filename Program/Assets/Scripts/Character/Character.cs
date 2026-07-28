@@ -3,6 +3,7 @@ using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class Character : MonoBehaviour
 {
@@ -27,7 +28,9 @@ public class Character : MonoBehaviour
     // 레이저
     [SerializeField] Transform laserPositionA;
     [SerializeField] Transform laserPositionB;
-    [SerializeField] Vector3 cursorPosition;
+    [SerializeField] GameObject aim;
+    [SerializeField] Vector3 aimPosition;
+    private GameObject laser;
 
     private void Start()
     {
@@ -39,6 +42,7 @@ public class Character : MonoBehaviour
     private void Update()
     {
         Control();
+        Draw();
     }
 
     private void FixedUpdate()
@@ -46,8 +50,6 @@ public class Character : MonoBehaviour
         Move();
         Rotate();
         Rolling();
-        Shoot(laserPositionA);
-        Shoot(laserPositionB);
     }
 
     public void Control()
@@ -75,15 +77,25 @@ public class Character : MonoBehaviour
             quaternion = Quaternion.Euler(0, 0, 90);
         }
 
+        if(Input.GetKeyDown(KeyCode.Return))
+        {
+            Shoot(laserPositionA);
+            Shoot(laserPositionB);
+        }
+
         // 입력 취소 확인
         if (Input.GetKeyUp(KeyCode.E) || Input.GetKeyUp(KeyCode.Q))
         {
             rollingComboTime = Time.time + comboTime;
         }
+    }
 
-        cursorPosition.x = transform.position.x;
-        cursorPosition.y = transform.position.y;
-        cursorPosition.z = transform.position.z + 100;
+    public void Draw()
+    {
+        aimPosition.x = transform.position.x * (Screen.width / 50) + (Input.GetAxis("Horizontal") * 300);
+        aimPosition.y = transform.position.y * (Screen.height / 50) + (-Input.GetAxis("Vertical") * 300);
+
+        aim.transform.localPosition = Vector3.Lerp(aim.transform.localPosition, aimPosition, Time.deltaTime * speed / 2);
     }
 
     public bool CheckCombo()
@@ -182,13 +194,8 @@ public class Character : MonoBehaviour
 
     public void Shoot(Transform transform)
     {
-        if(Input.GetKey(KeyCode.Return))
-        {
-            GameObject laser = Resources.Load<GameObject>("Laser");
-
-            laser.transform.position = transform.position;
-            laser.transform.position = Vector3.Lerp(transform.position, cursorPosition, Time.fixedDeltaTime);
-        }
+        laser = Resources.Load<GameObject>("Laser");
+        Instantiate(laser, transform.position, Quaternion.identity, gameObject.transform);
     }
 
     public void Pause()
