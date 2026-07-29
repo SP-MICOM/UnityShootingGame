@@ -29,7 +29,7 @@ public class Character : MonoBehaviour
     [SerializeField] Transform laserPositionA;
     [SerializeField] Transform laserPositionB;
     [SerializeField] GameObject aim;
-    [SerializeField] Vector3 aimPosition;
+    public Vector3 aimPosition;
     private GameObject laser;
 
     private void Start()
@@ -92,10 +92,11 @@ public class Character : MonoBehaviour
 
     public void Draw()
     {
-        aimPosition.x = transform.position.x * (Screen.width / 50) + (Input.GetAxis("Horizontal") * 300);
-        aimPosition.y = transform.position.y * (Screen.height / 50) + (-Input.GetAxis("Vertical") * 300);
+        aimPosition.x = transform.position.x + (Input.GetAxis("Horizontal") * 3);
+        aimPosition.y = transform.position.y + (-Input.GetAxis("Vertical") * 3);
 
-        aim.transform.localPosition = Vector3.Lerp(aim.transform.localPosition, aimPosition, Time.deltaTime * speed / 2);
+        aim.transform.position = Vector3.Lerp(aim.transform.position, aimPosition, Time.deltaTime * speed / 2);
+        aimPosition.z = 0.1f;
     }
 
     public bool CheckCombo()
@@ -195,7 +196,7 @@ public class Character : MonoBehaviour
     public void Shoot(Transform transform)
     {
         laser = Resources.Load<GameObject>("Laser");
-        Instantiate(laser, transform.position, Quaternion.identity, gameObject.transform);
+        Instantiate(laser, transform.position, Quaternion.identity);
     }
 
     public void Pause()
