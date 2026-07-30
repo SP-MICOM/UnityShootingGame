@@ -7,23 +7,18 @@ public class Laser : MonoBehaviour
     private Rigidbody rigidbody;
     private Vector3 vector3;
     private Quaternion quaternion;
-    private Character character;
-    private float speed;
+    private float speed = 0.5f;
 
     public void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
-        vector3 = transform.position;
-        quaternion = Quaternion.identity;
-        character = new Character();
-        
-        speed = 1.5f;
+        vector3 = rigidbody.transform.position;
+        aimPosition = GameObject.FindWithTag("Aim").transform.position;
+        quaternion = Quaternion.LookRotation(vector3, aimPosition);
     }
 
     public void FixedUpdate()
     {
-        aimPosition = character.aimPosition;
-
-        rigidbody.transform.position = Vector3.MoveTowards(vector3, aimPosition, speed);
+        rigidbody.transform.position += (aimPosition - vector3) * speed;
     }
 }

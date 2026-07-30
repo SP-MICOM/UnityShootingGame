@@ -65,7 +65,7 @@ public class Character : MonoBehaviour
 
         vector3.y = -Input.GetAxis("Vertical");
 
-        quaternion = Quaternion.Euler(0, 0, Input.GetAxis("Horizontal") * -speed);
+        quaternion = Quaternion.Euler(Input.GetAxis("Vertical") * 15f, Input.GetAxis("Horizontal") * 15f, -Input.GetAxis("Horizontal") * 15f);
 
         // 입력 확인
         if (Input.GetKey(KeyCode.E))
@@ -92,11 +92,11 @@ public class Character : MonoBehaviour
 
     public void Draw()
     {
-        aimPosition.x = transform.position.x + (Input.GetAxis("Horizontal") * 3);
-        aimPosition.y = transform.position.y + (-Input.GetAxis("Vertical") * 3);
+        aimPosition.x = transform.position.x + (Input.GetAxis("Horizontal") * 10f);
+        aimPosition.y = transform.position.y + (-Input.GetAxis("Vertical") * 7f);
+        aimPosition.z = transform.position.z + 10f;
 
-        aim.transform.position = Vector3.Lerp(aim.transform.position, aimPosition, Time.deltaTime * speed / 2);
-        aimPosition.z = 0.1f;
+        aim.transform.position = Vector3.Lerp(aim.transform.position, aimPosition, Time.deltaTime * speed / 2f);
     }
 
     public bool CheckCombo()
@@ -197,7 +197,7 @@ public class Character : MonoBehaviour
     {
         laser = Resources.Load<GameObject>("Laser");
         Instantiate(laser, transform.position, Quaternion.identity);
-    }
+    } 
 
     public void Pause()
     {
