@@ -1,4 +1,6 @@
 public enum Panel
 {
-    Pause
+    Pause,
+    Option,
+    Title,
 }

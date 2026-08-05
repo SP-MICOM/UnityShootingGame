@@ -2,19 +2,23 @@ using System;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
+using Unity.Collections;
 using static UnityEditor.Experimental.GraphView.GraphView;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class Character : MonoBehaviour
 {
     // 스테이터스
     [SerializeField] float speed;
-    [SerializeField] int Health;
+    [SerializeField] int health;
 
     // 컴포넌트
-    [SerializeField] Quaternion quaternion;
-    [SerializeField] Vector3 vector3;
-    [SerializeField] Rigidbody rigidbody;
+    private Quaternion quaternion;
+    private Vector3 vector3;
+    private Rigidbody rigidbody;
 
     // 롤링
     public bool isRolling = false;
@@ -28,13 +32,19 @@ public class Character : MonoBehaviour
     // 레이저
     [SerializeField] Transform laserPositionA;
     [SerializeField] Transform laserPositionB;
+    [SerializeField] Transform laserInventoryObject;
     [SerializeField] GameObject aim;
-    public Vector3 aimPosition;
+    private Queue<GameObject> laserInventory = new Queue<GameObject>();
+    private Vector3 aimPosition;
     private GameObject laser;
+
+    // 체력
+    [SerializeField] Slider healthBar;
 
     private void Start()
     {
         speed = 20f;
+        health = 100;
 
         rigidbody = GetComponent<Rigidbody>();
     }
@@ -43,6 +53,7 @@ public class Character : MonoBehaviour
     {
         Control();
         Draw();
+        Pause();
     }
 
     private void FixedUpdate()
@@ -92,11 +103,18 @@ public class Character : MonoBehaviour
 
     public void Draw()
     {
-        aimPosition.x = transform.position.x + (Input.GetAxis("Horizontal") * 10f);
-        aimPosition.y = transform.position.y + (-Input.GetAxis("Vertical") * 7f);
-        aimPosition.z = transform.position.z + 10f;
+        aimPosition.x = transform.position.x + (Input.GetAxis("Horizontal") * 5f);
+        aimPosition.y = transform.position.y + (-Input.GetAxis("Vertical") * 2f);
+        aimPosition.z = transform.position.z + 5f;
 
         aim.transform.position = Vector3.Lerp(aim.transform.position, aimPosition, Time.deltaTime * speed / 2f);
+    }
+
+    public void GetDamaged(int damage)
+    {
+        health -= damage;
+
+        healthBar.value = health;
     }
 
     public bool CheckCombo()
@@ -196,7 +214,33 @@ public class Character : MonoBehaviour
     public void Shoot(Transform transform)
     {
         laser = Resources.Load<GameObject>("Laser");
-        Instantiate(laser, transform.position, Quaternion.identity);
+        GameObject loadedLaser = null;
+
+        for(int i = 0; i < laserInventory.Count; i++)
+        {
+            loadedLaser = laserInventory.Peek();
+
+            if (loadedLaser != laser) laserInventory.Dequeue();
+            else break;
+        }
+
+        if (laserInventory.Count < 20)
+        {
+            loadedLaser = Instantiate(laser, transform.position, Quaternion.identity, laserInventoryObject);
+
+            laserInventory.Enqueue(loadedLaser);
+        }
+        else
+        {
+            loadedLaser = laserInventory.Dequeue();
+
+            loadedLaser.transform.position = transform.position;
+            loadedLaser.transform.rotation = Quaternion.identity;
+
+            laserInventory.Enqueue(loadedLaser);
+        }
+
+        Destroy(loadedLaser, 3f);
     } 
 
     public void Pause()
