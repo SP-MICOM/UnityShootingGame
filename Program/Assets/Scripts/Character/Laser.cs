@@ -6,31 +6,29 @@ public class Laser : MonoBehaviour
 {
     [SerializeField] Vector3 aimPosition;
     private Rigidbody rigidbody;
-    private Vector3 vector3;
-    private Quaternion quaternion;
+    private Vector3 position;
     private float speed = 15f;
     private float side = 0f;
 
     public void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
-        vector3 = rigidbody.transform.position;
+        position = rigidbody.transform.position;
         aimPosition = GameObject.FindWithTag("Aim").transform.position;
 
-        float joapyoX = vector3.x - rigidbody.transform.position.x;
+        float joapyoX = position.x - rigidbody.transform.position.x;
 
-        if (aimPosition.x < vector3.x + joapyoX) // 오른쪽
+        if (aimPosition.x < position.x + joapyoX) // 오른쪽
         {
             side = 1f;
         }
-        else if (aimPosition.x > vector3.x + joapyoX) // 왼쪽
+        else if (aimPosition.x > position.x + joapyoX) // 왼쪽
         {
             side = -1f;
         }
 
-        aimPosition.x -= -side * 1.5f;
-
-        quaternion = GameObject.FindWithTag("Aim").transform.rotation;
+        aimPosition.x -= -side * 1.4f;
+        aimPosition.y += position.y * 0.1f;
     }
     public void FixedUpdate()
     {
@@ -39,6 +37,31 @@ public class Laser : MonoBehaviour
 
     public void Fire()
     {
-        rigidbody.transform.position += (aimPosition - vector3) * speed * Time.fixedDeltaTime;
+        rigidbody.transform.position += (aimPosition - position) * speed * Time.fixedDeltaTime;
+    }
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Enemy")
+        {
+            Enemy hitEnemy = collision.gameObject.GetComponent<Enemy>();
+
+            if (hitEnemy is ChargeEnemy)
+            {
+                ChargeEnemy chargeEnemy = hitEnemy as ChargeEnemy;
+
+                GameObject player = GameObject.FindWithTag("Player");
+                Character character = player.GetComponent<Character>();
+
+                chargeEnemy.health -= character.damage;
+
+                Destroy(gameObject);
+                
+                if(chargeEnemy.health <= 0)
+                {
+                    Destroy(collision.gameObject);
+                }
+            }
+        }
     }
 }

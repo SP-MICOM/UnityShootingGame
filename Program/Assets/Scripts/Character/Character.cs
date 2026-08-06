@@ -12,12 +12,13 @@ using System.Linq;
 public class Character : MonoBehaviour
 {
     // 스테이터스
-    [SerializeField] float speed;
-    [SerializeField] int health;
+    [SerializeField] public float speed;
+    [SerializeField] public int health;
+    [SerializeField] public int damage;
 
     // 컴포넌트
-    private Quaternion quaternion;
-    private Vector3 vector3;
+    private Quaternion rotation;
+    private Vector3 position;
     private Rigidbody rigidbody;
 
     // 롤링
@@ -45,6 +46,7 @@ public class Character : MonoBehaviour
     {
         speed = 20f;
         health = 100;
+        damage = 10;
 
         rigidbody = GetComponent<Rigidbody>();
     }
@@ -67,29 +69,30 @@ public class Character : MonoBehaviour
     {
         if (rollingDirection != 0)
         {
-            vector3.x = Input.GetAxis("Horizontal") + (0.3f * -rollingDirection) * Mathf.Abs(Input.GetAxis("Horizontal"));
+            position.x = Input.GetAxis("Horizontal") + (0.3f * -rollingDirection) * Mathf.Abs(Input.GetAxis("Horizontal"));
         }
         else
         {
-            vector3.x = Input.GetAxis("Horizontal");
+            position.x = Input.GetAxis("Horizontal");
         }
 
-        vector3.y = -Input.GetAxis("Vertical");
+        position.y = -Input.GetAxis("Vertical");
 
-        quaternion = Quaternion.Euler(Input.GetAxis("Vertical") * 15f, Input.GetAxis("Horizontal") * 15f, -Input.GetAxis("Horizontal") * 15f);
+        rotation = Quaternion.Euler(Input.GetAxis("Vertical") * 15f, Input.GetAxis("Horizontal") * 15f, -Input.GetAxis("Horizontal") * 15f);
 
         // 입력 확인
         if (Input.GetKey(KeyCode.E))
         {
-            quaternion = Quaternion.Euler(0, 0, -90);
+            rotation = Quaternion.Euler(0, 0, -90);
         }
         else if (Input.GetKey(KeyCode.Q))
         {
-            quaternion = Quaternion.Euler(0, 0, 90);
+            rotation = Quaternion.Euler(0, 0, 90);
         }
 
         if(Input.GetKeyDown(KeyCode.Return))
         {
+            AudioManager.Instance.PlaySE("laser");
             Shoot(laserPositionA);
             Shoot(laserPositionB);
         }
@@ -104,7 +107,7 @@ public class Character : MonoBehaviour
     public void Draw()
     {
         aimPosition.x = transform.position.x + (Input.GetAxis("Horizontal") * 5f);
-        aimPosition.y = transform.position.y + (-Input.GetAxis("Vertical") * 2f);
+        aimPosition.y = transform.position.y + (-Input.GetAxis("Vertical") * 4f);
         aimPosition.z = transform.position.z + 5f;
 
         aim.transform.position = Vector3.Lerp(aim.transform.position, aimPosition, Time.deltaTime * speed / 2f);
@@ -147,22 +150,22 @@ public class Character : MonoBehaviour
 
     public void Move()
     {
-        float width = (Screen.width / 1000f) * 6f;
-        float height = (Screen.height / 1000f) * 6f;
+        float width = (Screen.width / 1000f) * 8f;
+        float height = (Screen.height / 1000f) * 8f;
 
-        float positionX = rigidbody.transform.position.x + vector3.x;
-        float positionY = rigidbody.transform.position.y + vector3.y;
+        float positionX = rigidbody.transform.position.x + position.x;
+        float positionY = rigidbody.transform.position.y + position.y;
 
         bool isMoveX = Mathf.Abs(positionX) < width;
         bool isMoveY = Mathf.Abs(positionY) < height;
 
         if (isMoveX && isMoveY)
         {
-            rigidbody.transform.position += vector3 * speed * Time.fixedDeltaTime;
+            rigidbody.transform.position += position * speed * Time.fixedDeltaTime;
         }
         else
         {
-            Vector3 move = vector3 * speed * Time.fixedDeltaTime;
+            Vector3 move = position * speed * Time.fixedDeltaTime;
 
             if (!isMoveX)  move.x = 0;
             if (!isMoveY) move.y = 0;
@@ -177,7 +180,7 @@ public class Character : MonoBehaviour
         {
             Debug.Log("Rotating");
 
-            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.fixedDeltaTime * speed);
+            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.fixedDeltaTime * speed);
         }
     }
 
@@ -199,15 +202,15 @@ public class Character : MonoBehaviour
 
         if (isRolling && Time.fixedTime < rollingCoolTime - (coolTime / 2))
         {
-            quaternion = Quaternion.Euler(0, 0, rollingCount * rollingDirection * (360f / (speed * coolTime)));
+            rotation = Quaternion.Euler(0, 0, rollingCount * rollingDirection * (360f / (speed * coolTime)));
 
-            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.fixedDeltaTime * speed);
+            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.fixedDeltaTime * speed);
 
             rollingCount++;
         }
         else if(isRolling)
         {
-            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, quaternion, Time.fixedDeltaTime * speed);
+            rigidbody.transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.fixedDeltaTime * speed);
         }
     }
 
@@ -248,6 +251,23 @@ public class Character : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             PanelManager.Instance.Open(Panel.Pause);
+        }
+    }
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Enemy")
+        {
+            AudioManager.Instance.PlaySE("damaged");
+
+            Enemy hitEnemy = collision.gameObject.GetComponent<Enemy>();
+
+            if (hitEnemy is ChargeEnemy)
+            {
+                ChargeEnemy chargeEnemy = hitEnemy as ChargeEnemy;
+
+                GetDamaged(chargeEnemy.damage);
+            }
         }
     }
 }

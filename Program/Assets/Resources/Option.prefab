@@ -359,6 +359,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ada1f336558b1594c8494af4f65e1c39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Option
+  windowModes: {fileID: 8994387901867999580}
+  volumeSlider: {fileID: 8789088347948694718}
+  preWindowMode: 0
+  preVolumeValue: 0
 --- !u!1 &740018308487069896
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,9 +448,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 4800861223181372610}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 100
+  m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 100
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
