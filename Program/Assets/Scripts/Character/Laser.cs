@@ -7,7 +7,7 @@ public class Laser : MonoBehaviour
     [SerializeField] Vector3 aimPosition;
     private Rigidbody rigidbody;
     private Vector3 position;
-    private float speed = 15f;
+    public float speed = 15f;
     private float side = 0f;
 
     public void Start()
@@ -42,25 +42,25 @@ public class Laser : MonoBehaviour
 
     public void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Enemy")
+        Enemy enemy = collision.gameObject.GetComponent<Enemy>();
+
+        if (enemy != null)
         {
-            Enemy hitEnemy = collision.gameObject.GetComponent<Enemy>();
+            Character character = GameObject.FindWithTag("Player").GetComponent<Character>();
 
-            if (hitEnemy is ChargeEnemy)
+            enemy.health -= character.damage;
+
+            AudioManager.Instance.PlaySE("damaged");
+
+            Destroy(gameObject);
+
+            if (enemy.health <= 0)
             {
-                ChargeEnemy chargeEnemy = hitEnemy as ChargeEnemy;
+                ParticleManager.Instance.Emit(enemy.transform.position);
 
-                GameObject player = GameObject.FindWithTag("Player");
-                Character character = player.GetComponent<Character>();
+                GameManager.Instance.GetScore(enemy.score);
 
-                chargeEnemy.health -= character.damage;
-
-                Destroy(gameObject);
-                
-                if(chargeEnemy.health <= 0)
-                {
-                    Destroy(collision.gameObject);
-                }
+                Destroy(enemy.gameObject);
             }
         }
     }

@@ -2,11 +2,12 @@ using UnityEngine;
 
 public class ChargeEnemy : Enemy
 {
-    public ChargeEnemy()
+    public void Awake()
     {
         health = 10;
-        speed = 2f;
+        speed = 1f;
         damage = 10;
+        score = 100;
     }
 
     public void Start()
@@ -14,8 +15,15 @@ public class ChargeEnemy : Enemy
         position = gameObject.transform.position;
         rotation = gameObject.transform.rotation;
         rigidbody = GetComponent<Rigidbody>();
-
-        playerPosition = GameObject.FindGameObjectWithTag("Player").transform.position;
+        
+        if(GameObject.FindGameObjectWithTag("Player"))
+        {
+            playerPosition = GameObject.FindGameObjectWithTag("Player").transform.position;
+        }
+        else
+        {
+            playerPosition = gameObject.transform.position;
+        }
     }
 
     public void FixedUpdate()

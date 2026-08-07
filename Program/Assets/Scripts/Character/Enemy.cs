@@ -8,6 +8,7 @@ public abstract class Enemy : MonoBehaviour
     public int health;
     public float speed;
     public int damage;
+    public int score;
     protected Vector3 playerPosition;
 
     public abstract void Move();

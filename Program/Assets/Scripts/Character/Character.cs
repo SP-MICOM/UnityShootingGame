@@ -42,12 +42,17 @@ public class Character : MonoBehaviour
     // 체력
     [SerializeField] Slider healthBar;
 
+    // 스코어
+    [SerializeField] Text scoreText;
+    [SerializeField] Text highScoreText;
+
     private void Start()
     {
         speed = 20f;
         health = 100;
         damage = 10;
 
+        AudioManager.Instance.PlayBGM("BGM");
         rigidbody = GetComponent<Rigidbody>();
     }
 
@@ -90,7 +95,7 @@ public class Character : MonoBehaviour
             rotation = Quaternion.Euler(0, 0, 90);
         }
 
-        if(Input.GetKeyDown(KeyCode.Return))
+        if(Input.GetKeyDown(KeyCode.Return) && Time.timeScale != 0)
         {
             AudioManager.Instance.PlaySE("laser");
             Shoot(laserPositionA);
@@ -111,6 +116,9 @@ public class Character : MonoBehaviour
         aimPosition.z = transform.position.z + 5f;
 
         aim.transform.position = Vector3.Lerp(aim.transform.position, aimPosition, Time.deltaTime * speed / 2f);
+
+        scoreText.text = GameManager.Instance.score.ToString();
+        highScoreText.text = GameManager.Instance.highScore.ToString();
     }
 
     public void GetDamaged(int damage)
@@ -118,6 +126,16 @@ public class Character : MonoBehaviour
         health -= damage;
 
         healthBar.value = health;
+
+        if (health <= 0)
+        {
+            Explose();
+        }
+        else
+        {
+            ParticleManager.Instance.Emit(transform.position);
+            AudioManager.Instance.PlaySE("damaged");
+        }
     }
 
     public bool CheckCombo()
@@ -227,7 +245,9 @@ public class Character : MonoBehaviour
             else break;
         }
 
-        if (laserInventory.Count < 20)
+        int count = laserInventory.Count;
+
+        if (laserInventory.Count <= 20)
         {
             loadedLaser = Instantiate(laser, transform.position, Quaternion.identity, laserInventoryObject);
 
@@ -250,16 +270,31 @@ public class Character : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            Time.timeScale = 0f;
+
             PanelManager.Instance.Open(Panel.Pause);
         }
+    }
+
+    public void Explose()
+    {
+        ParticleManager.Instance.Emit(transform.position);
+
+        AudioManager.Instance.PlaySE("explosion");
+
+        AudioManager.Instance.StopBGM();
+
+        Destroy(gameObject);
+
+        GameManager.Instance.ResetGame();
+
+        GameManager.Instance.ReturnToTitle();
     }
 
     public void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Enemy")
         {
-            AudioManager.Instance.PlaySE("damaged");
-
             Enemy hitEnemy = collision.gameObject.GetComponent<Enemy>();
 
             if (hitEnemy is ChargeEnemy)
@@ -267,6 +302,18 @@ public class Character : MonoBehaviour
                 ChargeEnemy chargeEnemy = hitEnemy as ChargeEnemy;
 
                 GetDamaged(chargeEnemy.damage);
+            }
+            else if (hitEnemy is ShootingEnemy)
+            {
+                ShootingEnemy shootingEnemy = hitEnemy as ShootingEnemy;
+
+                GetDamaged(shootingEnemy.damage);
+            }
+            else if (hitEnemy is EnemyLaser && !isRolling)
+            {
+                EnemyLaser enemyLaser = hitEnemy as EnemyLaser;
+
+                GetDamaged(enemyLaser.damage);
             }
         }
     }

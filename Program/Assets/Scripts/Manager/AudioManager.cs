@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 public class AudioManager : Singleton<AudioManager>
 {
-    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioSource sourceSE;
+    [SerializeField] AudioSource sourceBGM;
     [SerializeField] Dictionary<string, AudioClip> audioClips = new Dictionary<string, AudioClip>();
 
     public void PlaySE(string soundName)
@@ -17,8 +18,8 @@ public class AudioManager : Singleton<AudioManager>
             audioClips.Add(soundName, clip);
         }
 
-        audioSource.clip = clip;
-        audioSource.PlayOneShot(clip);
+        sourceSE.clip = clip;
+        sourceSE.PlayOneShot(clip);
     }
 
     public void PlayBGM(string soundName)
@@ -27,17 +28,24 @@ public class AudioManager : Singleton<AudioManager>
 
         if (audioClips.TryGetValue(soundName, out clip) == false)
         {
-            clip = Resources.Load<AudioClip>("Sounds/SE/" + soundName);
+            clip = Resources.Load<AudioClip>("Sounds/BGM/" + soundName);
 
             audioClips.Add(soundName, clip);
         }
 
-        audioSource.clip = clip;
-        audioSource.PlayOneShot(clip);
+        sourceBGM.clip = clip;
+        sourceBGM.loop = true;
+        sourceBGM.Play();
+    }
+
+    public void StopBGM()
+    {
+        sourceBGM.Stop();
     }
 
     public void SetVolume(float value)
     {
-        audioSource.volume = value;
+        sourceSE.volume = value;
+        sourceBGM.volume = value;
     }
 }
